@@ -52,7 +52,6 @@
                         alert('Erro ao ler arquivo. \nA Página será recarregada.')
                         window.location.reload();
                 }
-                //console.log(reader.result)
                 console.log(regComErro)
             }
             reader.readAsText(input1.files[0])
@@ -71,11 +70,8 @@
                     for (let ii = 0; ii < obj.Registros.length; ii++) {
                         if (regComErro[i].CorrelationId === obj.Registros[ii].CorrelationId) {
                             idCompraComErro.push(obj.Registros[ii])
-                            //idCompraComErro.push(obj.Registros[ii].Payload)
                         }
-                        
                     }
-                    
                 }
                 console.log('Arquivo 2 lido e registros com erro armazenados.')
                 } catch (err) {
@@ -90,6 +86,7 @@
 
         function converteArqParaJSON(e){
             var temp2 = e.replace(/'/g,'').replace(/""/g,'"').replace(/}}"/g,'}}').split('\n').slice(1,-1)
+            
             for (let i = 0; i < temp2.length; i++) {
                 temp2[i] = temp2[i].split(' ').pop()
             }
@@ -97,7 +94,6 @@
             var meujson = '{ "Registros": ['
             meujson = meujson+temp2.concat(']}') // nesse ponto termina a conversão de CSV pra JSON
             return meujson
-            
         }
 
         function downloadURL(url, name) {

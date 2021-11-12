@@ -11,7 +11,6 @@ function converteArqParaJSON(e){
     var meujson = '{ "Registros": ['
     meujson = meujson+temp2.concat(']}') // nesse ponto termina a conversão de CSV pra JSON
     return meujson
-    
 }
 
 try { // armazena transacao com erro em regComErro
@@ -38,10 +37,8 @@ try { //armazena registros com erro quando o CorrelationId for igual
             if (regComErro[i].CorrelationId === obj.Registros[ii].CorrelationId) {
                 idCompraComErro.push(obj.Registros[ii])
                 //idCompraComErro.push(obj.Registros[ii].Payload)
-            }
-            
-        }
-           
+            }   
+        } 
     }
     console.log('Arquivo 2 lido e registros com erro armazenados.')
     } catch (err) {
