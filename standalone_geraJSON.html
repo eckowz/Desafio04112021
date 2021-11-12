@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+<body>
+    <!-- Pagina para executada fora do Runtime environment, basta abrir via browser e selecionar os arquivos-->
+    <!-- Essa pagina recebe 2 arquivos CSV, trata eles, processa os dados e cria um arquivo JSON com o retorno -->
+    <label for="file-upload-erro" class="custom-file-upload">
+        <i class="fa fa-cloud-upload"></i> Selecione o Arquivo com os Erros 
+    </label>
+    <input id="file-upload-erro" type="file"/>
+
+    <br>
+    <br>
+
+    <label for="file-upload-idcompra" class="custom-file-upload">
+        <i class="fa fa-cloud-upload"></i> Selecione o Arquivo com o Id_Compra
+    </label>
+    <input id="file-upload-idcompra" type="file"/>
+
+    <br>
+    <br>
+    <button onclick="downloadFile()">Gerar JSON</button>
+
+
+    <script>
+        const input1 = document.querySelector('input[id="file-upload-erro"]')
+        const input2 = document.querySelector('input[id="file-upload-idcompra"]')
+        var regComErro = []
+        var idCompraComErro = []
+
+        input1.addEventListener('change', function(e){
+            console.log(input1.files)
+            const reader = new FileReader()
+            reader.onload = function() {
+                try { // armazena transacao com erro em regComErro
+                    var temp1 = reader.result
+                    temp1 = converteArqParaJSON(temp1)
+                    var obj = JSON.parse(temp1)
+                    for (let i = 0; i < obj.Registros.length; i++) {
+                        if (obj.Registros[i].Response.code == 1) {
+                            regComErro.push(obj.Registros[i]) 
+                        }    
+                    }
+                    console.log('Arquivo 1 lido e registros com erro armazenados.')
+                    } catch (err) {
+                        console.error(err)
+                        alert('Erro ao ler arquivo. \nA Página será recarregada.')
+                        window.location.reload();
+                }
+                //console.log(reader.result)
+                console.log(regComErro)
+            }
+            reader.readAsText(input1.files[0])
+        },false)
+        
+        input2.addEventListener('change', function(e){
+            console.log(input2.files)
+            const reader = new FileReader()
+            reader.onload = function() {
+                try { //armazena registros com erro quando o CorrelationId for igual
+                var temp1 = reader.result
+                temp1 = converteArqParaJSON(temp1)
+                var obj = JSON.parse(temp1)
+
+                for (let i = 0; i < regComErro.length; i++) {
+                    for (let ii = 0; ii < obj.Registros.length; ii++) {
+                        if (regComErro[i].CorrelationId === obj.Registros[ii].CorrelationId) {
+                            idCompraComErro.push(obj.Registros[ii])
+                            //idCompraComErro.push(obj.Registros[ii].Payload)
+                        }
+                        
+                    }
+                    
+                }
+                console.log('Arquivo 2 lido e registros com erro armazenados.')
+                } catch (err) {
+                    console.error(err)
+                    alert('Erro ao ler arquivo. \nA Página será recarregada.')
+                    window.location.reload();
+                }
+                console.log(idCompraComErro)
+            }
+            reader.readAsText(input2.files[0])
+        },false)
+
+        function converteArqParaJSON(e){
+            var temp2 = e.replace(/'/g,'').replace(/""/g,'"').replace(/}}"/g,'}}').split('\n').slice(1,-1)
+            for (let i = 0; i < temp2.length; i++) {
+                temp2[i] = temp2[i].split(' ').pop()
+            }
+            temp2 = temp2.join(separator = ',')
+            var meujson = '{ "Registros": ['
+            meujson = meujson+temp2.concat(']}') // nesse ponto termina a conversão de CSV pra JSON
+            return meujson
+            
+        }
+
+        function downloadURL(url, name) {
+            var link = document.createElement("a");
+            link.download = name;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            delete link;
+        }
+
+        function downloadFile() {
+            let dadosConvertidos=JSON.stringify(idCompraComErro, null, 2)
+            var blob = new Blob([dadosConvertidos], {type: 'application/json'});
+            var url  = window.URL.createObjectURL(blob);
+            downloadURL(url, "standalone-transacoes_com_erro.json");
+        }
+
+    </script>    
+</body>
+</html>
